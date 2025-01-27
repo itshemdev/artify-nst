@@ -2,12 +2,43 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import Input from "@mui/joy/Input";
+
+const ImagePicker = ({ type, image, setImage }: any) => {
+  return (
+    <div key={type} className="w-full">
+      {image ? (
+        <img src={URL.createObjectURL(image)} className="rounded-xl" />
+      ) : (
+        <>
+          <label
+            htmlFor={type}
+            className="border border-white w-full aspect-square rounded-xl flex items-center justify-center text-center"
+          >
+            {type}
+          </label>
+          <input
+            id={type}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e: any) => {
+              setImage(e.target.files[0]);
+            }}
+          />
+        </>
+      )}
+    </div>
+  );
+};
 
 export default function Home() {
-  const [styleImage, setStyleImage] = useState<any>(null);
-  const [contentImage, setContentImage] = useState<any>(null);
+  const [styleImage, setStyleImage] = useState<null | File>(null);
+  const [contentImage, setContentImage] = useState<null | File>(null);
   const [responseMessage, setResponseMessage] = useState("");
   const [styledImage, setStyledImage] = useState("");
+
+  console.log(contentImage, styleImage);
 
   const handleUpload = async (event: any) => {
     event.preventDefault();
@@ -29,8 +60,6 @@ export default function Home() {
 
       const result = await response.json();
 
-      console.log(result);
-
       if (response.ok) {
         setResponseMessage(`Success: ${result.message}`);
         setStyledImage(result.stylized_image_base64);
@@ -48,19 +77,15 @@ export default function Home() {
       <section className="max-w-5xl" style={{ margin: "80px auto" }}>
         <h1 className="text-6xl">Neural Style Transfer</h1>
         <form onSubmit={handleUpload} className="mt-10">
-          <div>
+          <div className="flex gap-10">
             {["contentImage", "styleImage"].map((type) => (
-              <input
+              <ImagePicker
                 key={type}
-                type="file"
-                accept="image/*"
-                onChange={(e: any) => {
-                  if (type == "contentImage") {
-                    setContentImage(e.target.files[0]);
-                  } else {
-                    setStyleImage(e.target.files[0]);
-                  }
-                }}
+                image={type === "contentImage" ? contentImage : styleImage}
+                type={type}
+                setImage={
+                  type === "contentImage" ? setContentImage : setStyleImage
+                }
               />
             ))}
           </div>
@@ -75,7 +100,7 @@ export default function Home() {
           {styledImage.length != 0 && (
             <img
               src={"data:image/jpeg;base64," + styledImage}
-              style={{ width: "400px", height: "400px" }}
+              className="w-full"
             />
           )}
         </form>
