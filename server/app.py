@@ -12,7 +12,7 @@ app = Flask(__name__)
 CORS(app)
 
 # Load TensorFlow Hub model
-hub_model = hub.load('https://tfhub.dev/google/magenta/arbitrary-image-stylization-v1-256/2')
+hub_model = tf.saved_model.load("./saved_model")
 
 def load_img_from_base64(base64_string):
     """Load an image from a base64 string."""
